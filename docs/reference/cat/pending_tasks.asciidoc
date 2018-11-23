@@ -1,7 +1,9 @@
 [[cat-pending-tasks]]
 == cat pending tasks
 
-`pending_tasks` 以表格格式提供的相同信息同 <<cluster-pending,`/_cluster/pending_tasks`>> API 。例如：
+`pending_tasks` provides the same information as the
+<<cluster-pending,`/_cluster/pending_tasks`>> API in a
+convenient tabular format. For example:
 
 [source,js]
 --------------------------------------------------
@@ -9,7 +11,7 @@ GET /_cat/pending_tasks?v
 --------------------------------------------------
 // CONSOLE
 
-如下显示：
+Might look like:
 
 [source,txt]
 --------------------------------------------------

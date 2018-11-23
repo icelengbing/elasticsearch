@@ -1,7 +1,8 @@
 [[cat-count]]
 == cat count
 
-`count` 可以快速访问整个集群或单个索引的文档数量。
+`count` provides quick access to the document count of the entire
+cluster, or individual indices.
 
 [source,js]
 --------------------------------------------------
@@ -11,7 +12,7 @@ GET /_cat/count?v
 // TEST[setup:big_twitter]
 // TEST[s/^/POST test\/test\?refresh\n{"test": "test"}\n/]
 
-结果如下：
+Looks like:
 
 [source,txt]
 --------------------------------------------------
@@ -20,7 +21,7 @@ epoch      timestamp count
 --------------------------------------------------
 // TESTRESPONSE[s/1475868259 15:24:19/\\d+ \\d+:\\d+:\\d+/ _cat]
 
-或者对于单个索引：
+Or for a single index:
 
 [source,js]
 --------------------------------------------------
@@ -37,4 +38,4 @@ epoch      timestamp count
 // TESTRESPONSE[s/1475868259 15:24:20/\\d+ \\d+:\\d+:\\d+/ _cat]
 
 
-NOTE: 文档计数表示活动文档的数量，不包括合并过程尚未清除的已删除文档。
+NOTE: The document count indicates the number of live documents and does not include deleted documents which have not yet been cleaned up by the merge process.
