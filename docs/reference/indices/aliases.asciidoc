@@ -1,16 +1,10 @@
 [[indices-aliases]]
-== Index Aliases
+== 索引别名
 
-APIs in Elasticsearch accept an index name when working against a
-specific index, and several indices when applicable. The index aliases
-API allows aliasing an index with a name, with all APIs automatically
-converting the alias name to the actual index name. An alias can also be
-mapped to more than one index, and when specifying it, the alias will
-automatically expand to the aliased indices. An alias can also be
-associated with a filter that will automatically be applied when
-searching, and routing values. An alias cannot have the same name as an index.
+在操作一个或者多个特定索引时 Elasticsearch 中的 API  需要使用索引名称参数。索引别名 API 可以为索引指定别名，所有的 API 都可以自动的转换这个别名为索引实际的名称。一个别名可以映射到一个或者多个索引上。当使用时，别名会自动的扩展到适配的所有索引上。别名还可以与过滤器关联，以便能搜索或者路由特定的值。别名不能与索引同名。
 
-Here is a sample of associating the alias `alias1` with index `test1`:
+以下是如何为索引 `test1` 关联别名 `alias1` 的示例：
+
 
 [source,js]
 --------------------------------------------------
@@ -24,7 +18,7 @@ POST /_aliases
 // CONSOLE
 // TEST[s/^/PUT test1\nPUT test2\n/]
 
-And here is removing that same alias:
+如何删除别名：
 
 [source,js]
 --------------------------------------------------
@@ -38,9 +32,8 @@ POST /_aliases
 // CONSOLE
 // TEST[continued]
 
-Renaming an alias is a simple `remove` then `add` operation within the
-same API. This operation is atomic, no need to worry about a short
-period of time where the alias does not point to an index:
+重命名别名可以简单的在一个 API 调用中完成，先 `remove` 再 `add` 。这是一个原子操作，不用担心别名会有瞬间断开与索引的关联。
+
 
 [source,js]
 --------------------------------------------------
@@ -55,8 +48,7 @@ POST /_aliases
 // CONSOLE
 // TEST[continued]
 
-Associating an alias with more than one index is simply several `add`
-actions:
+为多个索引添加同一个别名只需要简单的多次 `add` ：
 
 [source,js]
 --------------------------------------------------
@@ -71,7 +63,7 @@ POST /_aliases
 // CONSOLE
 // TEST[s/^/PUT test1\nPUT test2\n/]
 
-Multiple indices can be specified for an action with the `indices` array syntax:
+多索引关联别名也可以在一个动作中完成，通过使用 `indices` 数组语法即可：
 
 [source,js]
 --------------------------------------------------
@@ -85,11 +77,9 @@ POST /_aliases
 // CONSOLE
 // TEST[s/^/PUT test1\nPUT test2\n/]
 
-To specify multiple aliases in one action, the corresponding `aliases` array
-syntax exists as well.
+要在一个操作中指定多个别名，也有相应的 `aliases` 数组语法。
 
-For the example above, a glob pattern can also be used to associate an alias to
-more than one index that share a common name:
+针对上述示例，可以用一个通配符模式将共享公共名称的多个索引关联到一个别名上。
 
 [source,js]
 --------------------------------------------------
@@ -103,13 +93,11 @@ POST /_aliases
 // CONSOLE
 // TEST[s/^/PUT test1\nPUT test2\n/]
 
-In this case, the alias is a point-in-time alias that will group all
-current indices that match, it will not automatically update as new
-indices that match this pattern are added/removed.
+这种情况下的别名是一个时间点别名，它只会分组当前所有匹配的索引。当有匹配此模式的新索引添加或者删除时，它不会自动更新。
 
-It is an error to index to an alias which points to more than one index.
+这可能产生某个索引与关联多个索引的别名的错误匹配。
 
-It is also possible to swap an index with an alias in one operation:
+可以在一个操作中互换索引和别名：
 
 [source,js]
 --------------------------------------------------
@@ -124,21 +112,17 @@ POST /_aliases
 }
 --------------------------------------------------
 // CONSOLE
-<1> An index we've added by mistake
-<2> The index we should have added
-<3> `remove_index` is just like <<indices-delete-index>>
+<1> 一个我们错误添加的索引
+<2> 我们应该添加的索引
+<3> `remove_index` 就像 <<indices-delete-index>>
 
 [float]
 [[filtered]]
-=== Filtered Aliases
+=== 过滤的别名
 
-Aliases with filters provide an easy way to create different "views" of
-the same index. The filter can be defined using Query DSL and is applied
-to all Search, Count, Delete By Query and More Like This operations with
-this alias.
+带有过滤的别名提供了一种简单的方法来创建相同索引的不同 “视图”。可以使用查询表达式 定义过滤器，并使用此别名将其应用于所有搜索、计数、查询删除和其它类似操作。
 
-To create a filtered alias, first we need to ensure that the fields already
-exist in the mapping:
+要创建一个过滤的别名，首先我们需要确保映射中已经存在这样的字段：
 
 [source,js]
 --------------------------------------------------
@@ -157,7 +141,7 @@ PUT /test1
 --------------------------------------------------
 // CONSOLE
 
-Now we can create an alias that uses a filter on field `user`:
+现在我们能在字段 `user` 上创建一个带过滤器的别名：
 
 [source,js]
 --------------------------------------------------
@@ -179,15 +163,11 @@ POST /_aliases
 
 [float]
 [[aliases-routing]]
-==== Routing
+==== 路由
 
-It is possible to associate routing values with aliases. This feature
-can be used together with filtering aliases in order to avoid
-unnecessary shard operations.
+可以为别名关联一个路由值。此功能与带过滤的别名一起使用能避免不必要的分片操作。
 
-The following command creates a new alias `alias1` that points to index
-`test`. After `alias1` is created, all operations with this alias are
-automatically modified to use value `1` for routing:
+下面的命令创建一个指向 `test` 索引的新别名 `alias1`。之后针对这个别名的所有操作都会自动修改为使用值 `1` 进行路由：
 
 [source,js]
 --------------------------------------------------
@@ -207,8 +187,7 @@ POST /_aliases
 // CONSOLE
 // TEST[s/^/PUT test\n/]
 
-It's also possible to specify different routing values for searching
-and indexing operations:
+也可以为查询和索引指定不同的路由值：
 
 [source,js]
 --------------------------------------------------
@@ -229,13 +208,9 @@ POST /_aliases
 // CONSOLE
 // TEST[s/^/PUT test\n/]
 
-As shown in the example above, search routing may contain several values
-separated by comma. Index routing can contain only a single value.
+如上例所示，搜索路由可以包含由逗号分隔的多个值，但是索引路由只能使用单值。
 
-If a search operation that uses routing alias also has a routing parameter, an
-intersection of both search alias routing and routing specified in the
-parameter is used. For example the following command will use "2" as a
-routing value:
+如果一个使用了路由别名的查询操作自身也带有路由参数，则取两者的交集作为最终的路由参数。例如以下命令将使用“2”作为路由值。
 
 [source,js]
 --------------------------------------------------
@@ -246,19 +221,13 @@ GET /alias2/_search?q=user:kimchy&routing=2,3
 
 [float]
 [[aliases-write-index]]
-==== Write Index
+==== 写入索引
 
-It is possible to associate the index pointed to by an alias as the write index.
-When specified, all index and update requests against an alias that point to multiple
-indices will attempt to resolve to the one index that is the write index.
-Only one index per alias can be assigned to be the write index at a time. If no write index is specified
-and there are multiple indices referenced by an alias, then writes will not be allowed.
+可以将别名指向的索引作为写入索引。当这样指定时，如果别名关联了多个索引，则针对该别名的所有索引和更新请求将试图解析出一个索引来作为写入索引。一次写索引操作只能分配给别名关联的索引中的一个。如果未指定写入索引，且别名关联了多个索引，则不允许写入。
 
-It is possible to specify an index associated with an alias as a write index using both the aliases API
-and index creation API.
+可以使用别名 API 和创建索引 API 指定某别名关联的索引为写入索引。
 
-Setting an index to be the write index with an alias also affects how the alias is manipulated during
-Rollover (see <<indices-rollover-index, Rollover With Write Index>>).
+设置一个索引作为关联别名的写入索引也会影响 Rollover 期间操作别名的方式。 (参见 <<indices-rollover-index, Rollover With Write Index>>).
 
 [source,js]
 --------------------------------------------------
@@ -278,8 +247,7 @@ POST /_aliases
 // CONSOLE
 // TEST[s/^/PUT test\n/]
 
-In this example, we associate the alias `alias1` to both `test` and `test2`, where
-`test` will be the index chosen for writing to.
+在这个示例中，我们关联别名 `alias1` 到索引 `test` 和 `test2` 上，并将 `test` 作为写入索引。
 
 [source,js]
 --------------------------------------------------
@@ -291,8 +259,7 @@ PUT /alias1/_doc/1
 // CONSOLE
 // TEST[continued]
 
-The new document that was indexed to `/alias1/_doc/1` will be indexed as if it were
-`/test/_doc/1`.
+新文档被索引到 `/alias1/_doc/1` 就如同索引到 `/test/_doc/1` 一样。
 
 [source,js]
 --------------------------------------------------
@@ -301,8 +268,7 @@ GET /test/_doc/1
 // CONSOLE
 // TEST[continued]
 
-To swap which index is the write index for an alias, the Aliases API can be leveraged to
-do an atomic swap. The swap is not dependent on the ordering of the actions.
+要切换别名的写入索引，可以利用用别名 API 来执行原子操作。切换不依赖于操作的顺序。
 
 [source,js]
 --------------------------------------------------
@@ -330,35 +296,34 @@ POST /_aliases
 
 [IMPORTANT]
 =====================================
-Aliases that do not explicitly set `is_write_index: true` for an index, and
-only reference one index, will have that referenced index behave as if it is the write index
-until an additional index is referenced. At that point, there will be no write index and
-writes will be rejected.
+如果别名没有显示的为索引设置 `is_write_index: true` 属性，并且只关联了一个索引，那么这个索引就是其写入索引。直到别名又添加了另外的关联索引。此时，因为没有指定写入索引，写入操作将被拒绝。
+
 =====================================
 
 [float]
 [[alias-adding]]
-=== Add a single alias
+=== 添加简单别名
 
-An alias can also be added with the endpoint
+
+一个别名也可以简单的通过端点来添加。
 
 `PUT /{index}/_alias/{name}`
 
 
-where
+说明
 
 [horizontal]
-`index`::   The index the alias refers to. Can be any of `* | _all | glob pattern | name1, name2, …`
-`name`::   The name of the alias. This is a required option.
-`routing`:: An optional routing that can be associated with an alias.
-`filter`::  An optional filter that can be associated with an alias.
+`index`::   别名引用的索引，可以是任何一个 `* | _all | glob pattern | name1, name2, …`
+`name`::   别名的名称，这是必选项。
+`routing`:: 可选项，与别名关联的路由。
+`filter`::  可选项，与别名关联的过滤器。
 
-You can also use the plural `_aliases`.
+你也可以使用复数形式 `_aliases`.
 
 [float]
-==== Examples:
+==== 范例:
 
-Adding time based alias::
+添加基于时间的别名::
 +
 --
 [source,js]
@@ -369,10 +334,10 @@ PUT /logs_201305/_alias/2013
 // TEST[s/^/PUT logs_201305\n/]
 --
 
-Adding a user alias::
+添加用户别名::
 +
 --
-First create the index and add a mapping for the `user_id` field:
+首先创建索引并为字段 `user_id` 添加映射：
 
 [source,js]
 --------------------------------------------------
@@ -389,7 +354,7 @@ PUT /users
 --------------------------------------------------
 // CONSOLE
 
-Then add the alias for a specific user:
+然后为特定用户添加别名：
 
 [source,js]
 --------------------------------------------------
@@ -410,9 +375,9 @@ PUT /users/_alias/user_12
 
 [float]
 [[alias-index-creation]]
-=== Aliases during index creation
+=== 索引创建期间的别名
 
-Aliases can also be specified during <<create-index-aliases,index creation>>:
+也可以在 <<create-index-aliases,index creation>> 期间指定别名
 
 [source,js]
 --------------------------------------------------
@@ -439,18 +404,18 @@ PUT /logs_20162801
 
 [float]
 [[deleting]]
-=== Delete aliases
+=== 删除别名
 
 
-The rest endpoint is: `/{index}/_alias/{name}`
+对应的 rest 服务端点为： `/{index}/_alias/{name}`
 
-where
+说明
 
 [horizontal]
 `index`::  `* | _all | glob pattern | name1, name2, …`
 `name`::  `* | _all | glob pattern | name1, name2, …`
 
-Alternatively you can use the plural `_aliases`. Example:
+或者你也可以使用复数 `_aliases`. 例如：
 
 [source,js]
 --------------------------------------------------
@@ -461,35 +426,27 @@ DELETE /logs_20162801/_alias/current_day
 
 [float]
 [[alias-retrieving]]
-=== Retrieving existing aliases
+=== 检索现有别名
 
-The get index alias API allows to filter by
-alias name and index name. This api redirects to the master and fetches
-the requested index aliases, if available. This api only serialises the
-found index aliases.
+获取索引别名 API 允许你按别名和索引名来过滤查找。这个 api 会重定向到主节点并获取请求的索引别名，如果可用，此 api 仅仅序列化找到的别名并返回。
 
-Possible options:
+可能的选项：
 [horizontal]
 `index`::
-    The index name to get aliases for. Partial names are
-    supported via wildcards, also multiple index names can be specified
-    separated with a comma. Also the alias name for an index can be used.
+    别名关联的索引名称，支持通配符匹配，也可以指定逗号分隔的多个索引名称。还支持索引的别名。
 
 `alias`::
-    The name of alias to return in the response. Like the index
-    option, this option supports wildcards and the option the specify
-    multiple alias names separated by a comma.
+    别名的名称，支持通配符和由逗号分隔的多个别名。
 
 `ignore_unavailable`::
-    What to do if an specified index name doesn't
-    exist. If set to `true` then those indices are ignored.
+    如果指定的索引名称不存在怎么办？如果设置为 `true` 则忽略这些索引。
 
-The rest endpoint is: `/{index}/_alias/{alias}`.
+对应的 rest 服务端点为： `/{index}/_alias/{alias}`.
 
 [float]
-==== Examples:
+==== 范例：
 
-All aliases for the index `logs_20162801`:
+获取索引 `logs_20162801` 的所有别名：
 
 [source,js]
 --------------------------------------------------
@@ -498,7 +455,7 @@ GET /logs_20162801/_alias/*
 // CONSOLE
 // TEST[continued]
 
-Response:
+响应：
 
 [source,js]
 --------------------------------------------------
@@ -518,7 +475,7 @@ Response:
 --------------------------------------------------
 // TESTRESPONSE
 
-All aliases with the name 2016 in any index:
+查找所有名称为 2016 的别名：
 
 [source,js]
 --------------------------------------------------
@@ -527,7 +484,7 @@ GET /_alias/2016
 // CONSOLE
 // TEST[continued]
 
-Response:
+响应：
 
 [source,js]
 --------------------------------------------------
@@ -547,7 +504,7 @@ Response:
 --------------------------------------------------
 // TESTRESPONSE
 
-All aliases that start with 20 in any index:
+查找所有以 20 开头的别名
 
 [source,js]
 --------------------------------------------------
@@ -556,7 +513,7 @@ GET /_alias/20*
 // CONSOLE
 // TEST[continued]
 
-Response:
+响应：
 
 [source,js]
 --------------------------------------------------
@@ -576,9 +533,7 @@ Response:
 --------------------------------------------------
 // TESTRESPONSE
 
-There is also a HEAD variant of the get indices aliases api to check if
-index aliases exist. The indices aliases exists api supports the same
-option as the get indices aliases api. Examples:
+还有一个 HEAD 请求也可以用来检查索引别名是否存在。支持的参数同上。例如：
 
 [source,js]
 --------------------------------------------------
