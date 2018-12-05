@@ -1,80 +1,46 @@
 [[indices-split-index]]
-== Split Index
+== 拆分索引
 
-The split index API allows you to split an existing index into a new index,
-where each original primary shard is split into two or more primary shards in
-the new index.
+拆分索引 API 允许您将现有索引拆分为新索引，其中每个原始主分片在新索引中可以被拆分为两个或多个主分片。
 
-IMPORTANT:  The `_split` API requires the source index to be created with a
-specific `number_of_routing_shards` in order to be split in the future. This
-requirement has been removed in Elasticsearch 7.0.
+IMPORTANT:  `_split` API 要求使用特定的参数 `number_of_routing_shards` 来创建源索引，以便将来拆分。这个要求已在 Elasticsearch 7.0中被删除。
 
-The number of times the index can be split (and the number of shards that each
-original shard can be split into) is determined by the
-`index.number_of_routing_shards` setting. The number of routing shards
-specifies the hashing space that is used internally to distribute documents
-across shards with consistent hashing. For instance, a 5 shard index with
-`number_of_routing_shards` set to `30` (`5 x 2 x 3`) could be split by a
-factor of `2` or `3`.  In other words, it could be split as follows:
 
-* `5` -> `10` -> `30`  (split by 2, then by 3)
-* `5` -> `15` -> `30` (split by 3, then by 2)
-* `5` -> `30` (split by 6)
+索引可以被拆分的次数（以及每个原始分片可以被拆分的分片数）由 `index.number_of_routing_shards` 设置决定。路由分片的数量指定了内部使用的哈希空间，以便在具有一致性哈希的分片中分发文档。例如，一个有5个分片的索引，如果 `number_of_routing_shards` 设置为 `30` (`5 x 2 x 3`) 则其可以被拆分为因子 `2` 或者 `3`。换句话说，它可以做如下拆分：
+
+* `5` -> `10` -> `30`  （先分2，再分3）
+* `5` -> `15` -> `30` （先分3，再分2）
+* `5` -> `30` （分6）
 
 [float]
-=== How does splitting work?
+=== 拆分是如何工作的？
 
-Splitting works as follows:
+拆分的工作原理如下：
 
-* First, it creates a new target index with the same definition as the source
-  index, but with a larger number of primary shards.
+* 首先，它创建一个新的目标索引，其定义与源索引相同，但主分片数量较多。
 
-* Then it hard-links segments from the source index into the target index. (If
-  the file system doesn't support hard-linking, then all segments are copied
-  into the new index, which is a much more time consuming process.)
+* 然后，它将源索引中的段硬链接到目标索引。（如果文件系统不支持硬链接，则会将所有段复制到新索引中，这是一个更耗时的过程。）
 
-* Once the low level files are created all documents will be `hashed` again to delete
-  documents that belong to a different shard.
+* 一旦创建了低层级的文件，所有文档将再次被“哈希”以删除属于不同分片的文档。
 
-* Finally, it recovers the target index as though it were a closed index which
-  had just been re-opened.
+* 最后，恢复目标索引，就像是重新打开一个关闭的索引。
 
 [float]
-=== Why doesn't Elasticsearch support incremental resharding?
+=== 为什么 Elasticsearch 不支持增量重新分片？
 
-Going from `N` shards to `N+1` shards, aka. incremental resharding, is indeed a
-feature that is supported by many key-value stores. Adding a new shard and
-pushing new data to this new shard only is not an option: this would likely be
-an indexing bottleneck, and figuring out which shard a document belongs to
-given its `_id`, which is necessary for get, delete and update requests, would
-become quite complex. This means that we need to rebalance existing data using
-a different hashing scheme.
+从 `N` 到 `N+1` 分片，又被称为增量重新分片，确实是许多键值存储引擎支持的功能。添加新的分片并将新数据推送到这个新分片不是一个好的选择：这可能会成为索引瓶颈，对于那些必须的查找、删除和更新请求来说，根据给定 `_id` 查找对应分片将变得相当复杂。这意味着我们需要使用不同的哈希方案来重新平衡现有数据。
 
-The most common way that key-value stores do this efficiently is by using
-consistent hashing. Consistent hashing only requires `1/N`-th of the keys to
-be relocated when growing the number of shards from `N` to `N+1`. However
-Elasticsearch's unit of storage, shards, are Lucene indices. Because of their
-search-oriented data structure, taking a significant portion of a Lucene index,
-be it only 5% of documents, deleting them and indexing them on another shard
-typically comes with a much higher cost than with a key-value store. This cost
-is kept reasonable when growing the number of shards by a multiplicative factor
-as described in the above section: this allows Elasticsearch to perform the
-split locally, which in-turn allows to perform the split at the index level
-rather than reindexing documents that need to move, as well as using hard links
-for efficient file copying.
+键值存储最有效实现此目的的方法是使用一致性哈希。当分片的数量从 `N` 增加到 `N+1` 时，一致性哈希只需要重新定位键 `1/N` 次。然而 Elasticsearch 的存储、分片的单元是 Lucene 的索引。这种面向搜索的数据结构占据了 Lucene 索引的很大一部分。即使只有5%的文档，删除它们并在另一个分片上索引它们的代价通常比使用键值存储要高得多。如上一节所述，当通过多重因素增加分片数量时，这种成本是合理的：这允许 Elasticsearch 在本地执行拆分，从而允许在索引级别执行拆分，而不是重新索引那些需要移动的文档，以及使用硬链接进行文件复制。
 
-In the case of append-only data, it is possible to get more flexibility by
-creating a new index and pushing new data to it, while adding an alias that
-covers both the old and the new index for read operations. Assuming that the
-old and new indices have respectively +M+ and +N+ shards, this has no overhead
-compared to searching an index that would have +M+N+ shards.
+在只新增数据的情况下，可以通过创建新索引并向其推送新数据，同时为读取操作添加覆盖旧索引和新索引的别名，从而获得更大的灵活性。假设新旧索引分别有 +M+ 和 +N+ 个分片，对比搜索具有 +M+N+ 个分片的索引没有额外开销。
+
 
 [float]
-=== Preparing an index for splitting
+=== 准备拆分索引
 
-Create an index with a routing shards factor:
+使用路由分片因子创建索引：
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 PUT my_source_index
 {
@@ -86,13 +52,11 @@ PUT my_source_index
 -------------------------------------------------
 // CONSOLE
 
-<1> Allows to split the index into two shards or in other words, it allows
-    for a single split operation.
+<1> 允许将索引拆分为两个分片，也就是说，它允许单个分割操作。
 
-In order to split an index, the index must be marked as read-only,
-and have <<cluster-health,health>> `green`.
+要拆分索引，必须先要将索引标记为只读，并且集群健康状态为 <<cluster-health,health>> `green` 。
 
-This can be achieved with the following request:
+可以通过以下请求来实现：
 
 [source,js]
 --------------------------------------------------
@@ -106,14 +70,12 @@ PUT /my_source_index/_settings
 // CONSOLE
 // TEST[continued]
 
-<1> Prevents write operations to this index while still allowing metadata
-    changes like deleting the index.
+<1> 禁止对此索引的写操作，但是允许更改元数据，例如删除索引。
 
 [float]
-=== Splitting an index
+=== 拆分索引
 
-To split `my_source_index` into a new index called `my_target_index`, issue
-the following request:
+要将索引 `my_source_index` 拆分到名为 `my_target_index` 的新索引，需要发出以下请求：
 
 [source,js]
 --------------------------------------------------
@@ -127,28 +89,24 @@ POST my_source_index/_split/my_target_index?copy_settings=true
 // CONSOLE
 // TEST[continued]
 
-The above request returns immediately once the target index has been added to
-the cluster state -- it doesn't wait for the split operation to start.
+添加目标索引后，上述请求会立即返回集群状态 -- 它不等待拆分操作开始。
 
 [IMPORTANT]
 =====================================
 
-Indices can only be split if they satisfy the following requirements:
+只有满足以下要求的索引才能被拆分：
 
-* the target index must not exist
+* 目标索引不存在。
 
-* The index must have less primary shards than the target index.
+* 索引的主分片必须小于目标索引的主分片数量。
 
-* The number of primary shards in the target index must be a factor of the
-  number of primary shards in the source index.
+* 目标索引中的主分片数必须是源索引中主分片数的一个因子。
 
-* The node handling the split process must have sufficient free disk space to
-  accommodate a second copy of the existing index.
+* 拆分进程所在节点必须具有足够的可用磁盘空间，以容纳现有索引的第二个副本。
 
 =====================================
 
-The `_split` API is similar to the <<indices-create-index, `create index` API>>
-and accepts `settings` and `aliases` parameters for the target index:
+`_split` API 类似于 <<indices-create-index, `create index` API>> 并接受目标索引的 `settings` 和  `aliases` 参数：
 
 [source,js]
 --------------------------------------------------
@@ -165,44 +123,26 @@ POST my_source_index/_split/my_target_index?copy_settings=true
 // CONSOLE
 // TEST[s/^/PUT my_source_index\n{"settings": {"index.blocks.write": true, "index.number_of_routing_shards" : 5, "index.number_of_shards": "1"}}\n/]
 
-<1> The number of shards in the target index. This must be a factor of the
-    number of shards in the source index.
+<1> 目标索引中的分片数。其必须是源索引中分片数量的一个因子。
 
 
-NOTE: Mappings may not be specified in the `_split` request.
+NOTE: 不能在 `_split` 请求中指定映射。
 
-NOTE: By default, with the exception of `index.analysis`, `index.similarity`,
-and `index.sort` settings, index settings on the source index are not copied
-during a split operation. With the exception of non-copyable settings, settings
-from the source index can be copied to the target index by adding the URL
-parameter `copy_settings=true` to the request. Note that `copy_settings` can not
-be set to `false`. The parameter `copy_settings` will be removed in 8.0.0
+NOTE: 默认情况下，除了 `index.analysis` 、 `index.similarity` 和 `index.sort` 设置外，在拆分操作期间不会复制源索引上的索引设置。但是，可以通过将 URL 参数 `copy_settings = true` 添加到请求中，将源索引中的设置复制到目标索引。注意，`copy_settings` 不能被设置为 `false` 。参数 `copy_settings` 将在8.0.0中被删除。
 
-deprecated[6.4.0, not copying settings is deprecated, copying settings will be
-the default behavior in 7.x]
+deprecated[6.4.0，不复制设置将会被弃用，在7.x中复制设置将是默认行为]
 
 [float]
-=== Monitoring the split process
+=== 监控拆分进程
 
-The split process can be monitored with the <<cat-recovery,`_cat recovery`
-API>>, or the <<cluster-health, `cluster health` API>> can be used to wait
-until all primary shards have been allocated by setting the  `wait_for_status`
-parameter to `yellow`.
+可以使用 <<cat-recovery,`_cat recovery`API>> 监控拆分进程，或者通过设置 `wait_for_status` 参数为 `yellow` 从而使用 <<cluster-health, `cluster health` API>> 来检查是否所有主分片都已经被分配。
 
-The `_split` API returns as soon as the target index has been added to the
-cluster state, before any shards have been allocated. At this point, all
-shards are in the state `unassigned`. If, for any reason, the target index
-can't be allocated, its primary shard will remain `unassigned` until it
-can be allocated on that node.
+在分配任何分片之前，只要目标索引已添加到群集状态，`_split` API 就会返回。此时，所有分片都处于 `unassigned` 状态。如果由于任何原因无法分配目标索引，则其主分片将保持 `unassigned`，直到可以在该节点上分配为止。
 
-Once the primary shard is allocated, it moves to state `initializing`, and the
-split process begins. When the split operation completes, the shard will
-become `active`. At that  point, Elasticsearch will try to allocate any
-replicas and may decide to relocate the primary shard to another node.
+一旦分配了主分片，它就会进入 `initializing` 状态，并开始拆分。操作完成后，分片将变为 `active`。此时，Elasticsearch 将尝试分配副本，并可能决定将主分片重定位到另一个节点上。
 
 [float]
-=== Wait For Active Shards
+=== 等待活动分片
 
-Because the split operation creates a new index to split the shards to,
-the <<create-index-wait-for-active-shards,wait for active shards>> setting
-on index creation applies to the split index action as well.
+因为拆分操作会创建一个新的索引来拆分分片，所以索引创建的 <<create-index-wait-for-active-shards,`waited active shards`>> 设置也适用于拆分索引操作。
+
