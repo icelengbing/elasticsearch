@@ -1,35 +1,22 @@
 [[indices-shrink-index]]
-== Shrink Index
+== 收缩索引
 
-The shrink index API allows you to shrink an existing index into a new index
-with fewer primary shards. The requested number of primary shards in the target index
-must be a factor of the number of shards in the source index. For example an index with
-`8` primary shards can be shrunk into `4`, `2` or `1` primary shards or an index
-with `15` primary shards can be shrunk into `5`, `3` or `1`. If the number
-of shards in the index is a prime number it can only be shrunk into a single
-primary shard. Before shrinking, a (primary or replica) copy of every shard
-in the index must be present on the same node.
+收缩索引 API 允许您将现有索引收缩为具有较少主分片的新索引。目标索引的主分片数必须是源索引分片数的一个因子。例如，带有 `8` 个主分片的索引可以收缩为 `4`、`2` 或者 `1` 个主分片，或者带有 `15` 个主分片的索引可以收缩为 `5`、`3` 或者 `1` 个主分片。如果索引中的分片数是素数，则其只能收缩为单个主分片。在收缩之前，索引中每个分片（主分片或者副本）都必须存在于同一节点上。
 
-Shrinking works as follows:
+收缩的工作原理如下：
 
-* First, it creates a new target index with the same definition as the source
-  index, but with a smaller number of primary shards.
+* 首先，创建一个新的目标索引，其定义与源索引相同，但主分片数量较少。
 
-* Then it hard-links segments from the source index into the target index. (If
-  the file system doesn't support hard-linking, then all segments are copied
-  into the new index, which is a much more time consuming process.)
+* 然后，将源索引中的段硬链接到目标索引。 （如果文件系统不支持硬链接，则会将所有段复制到新索引中，这是一个更耗时的过程。）
 
-* Finally, it recovers the target index as though it were a closed index which
-  had just been re-opened.
+* 最后，恢复目标索引，就好像刚打开一个曾经关闭的索引。
 
 [float]
-=== Preparing an index for shrinking
+=== 准备收缩索引
 
-In order to shrink an index, the index must be marked as read-only, and a
-(primary or replica) copy of every shard in the index must be relocated to the
-same node and have <<cluster-health,health>> `green`.
+为了收缩索引，必须将索引标记为只读，并且索引中每个分片（主分片或者副本）都必须重定位到同一节点，同时集群健康状态 <<cluster-health,health>> 必须是 `green` 。
 
-These two conditions can be achieved with the following request:
+可以通过以下请求实现上述两个条件：
 
 [source,js]
 --------------------------------------------------
@@ -43,22 +30,17 @@ PUT /my_source_index/_settings
 --------------------------------------------------
 // CONSOLE
 // TEST[s/^/PUT my_source_index\n/]
-<1> Forces the relocation of a copy of each shard to the node with name
-    `shrink_node_name`.  See <<shard-allocation-filtering>> for more options.
+<1> 强制将每个分片定位到名为 `shrink_node_name` 的节点。更多选项可参阅 <<shard-allocation-filtering>> 。
 
-<2> Prevents write operations to this index while still allowing metadata
-    changes like deleting the index.
+<2> 阻止对索引的写入操作，但是仍允许更改元数据，例如删除索引。
 
-It can take a while to relocate the source index.  Progress can be tracked
-with the <<cat-recovery,`_cat recovery` API>>, or the <<cluster-health,
-`cluster health` API>> can be used to wait until all shards have relocated
-with the `wait_for_no_relocating_shards` parameter.
+重新定位源索引可能需要一段时间。可以使用 <<cat-recovery,`_cat recovery` API>> 跟踪进度，或者使用带 `wait_for_no_relocating_shards` 参数的 <<cluster-health,
+`cluster health` API>> 来监控是否所有分片都已经被重定位。
 
 [float]
-=== Shrinking an index
+=== 收缩索引
 
-To shrink `my_source_index` into a new index called `my_target_index`, issue
-the following request:
+要将索引 `my_source_index` 收缩为索引 `my_target_index` ，可以通过如下请求：
 
 [source,js]
 --------------------------------------------------
@@ -73,36 +55,29 @@ POST my_source_index/_shrink/my_target_index?copy_settings=true
 // CONSOLE
 // TEST[continued]
 
-<1> Clear the allocation requirement copied from the source index.
-<2> Clear the index write block copied from the source index.
+<1> 清除从源索引复制来的重定位分片属性。
+<2> 清除从源索引复制来的阻止写请求设置。
 
-The above request returns immediately once the target index has been added to
-the cluster state -- it doesn't wait for the shrink operation to start.
+目标索引添加到集群状态后，上述请求会立即返回 -- 它不会等待收缩操作开始。
 
 [IMPORTANT]
 =====================================
 
-Indices can only be shrunk if they satisfy the following requirements:
+索引只有满足以下要求才能被收缩：
 
-* the target index must not exist
+* 目标索引不存在。
 
-* The index must have more primary shards than the target index.
+* 索引的主分片数必须比目标索引多。
 
-* The number of primary shards in the target index must be a factor of the
-  number of primary shards in the source index. The source index must have
-  more primary shards than the target index.
+* 目标索引中的主分片数必须是源索引中主分片数的一个因子。源索引必须具有比目标索引更多的主分片。
 
-* The index must not contain more than `2,147,483,519` documents in total
-  across all shards that will be shrunk into a single shard on the target index
-  as this is the maximum number of docs that can fit into a single shard.
+* 所有分片中的文档总数不得超过 `2,147,483,519` ，因为这些分片将收缩到目标索引上的单个分片，而上述数字是单个分片的最大文档数。
 
-* The node handling the shrink process must have sufficient free disk space to
-  accommodate a second copy of the existing index.
+* 处理收缩过程的节点上必须有足够的可用磁盘空间，以便容纳现有索引的第二个拷贝。
 
 =====================================
 
-The `_shrink` API is similar to the <<indices-create-index, `create index` API>>
-and accepts `settings` and `aliases` parameters for the target index:
+`_shrink` API 类似于 <<indices-create-index, `create index` API>>  并且接受目标索引的 `settings` 和 `aliases` 参数：
 
 [source,js]
 --------------------------------------------------
@@ -121,47 +96,26 @@ POST my_source_index/_shrink/my_target_index?copy_settings=true
 // CONSOLE
 // TEST[s/^/PUT my_source_index\n{"settings": {"index.blocks.write": true}}\n/]
 
-<1> The number of shards in the target index. This must be a factor of the
-    number of shards in the source index.
-<2> Best compression will only take affect when new writes are made to the
-    index, such as when <<indices-forcemerge,force-merging>> the shard to a single
-    segment.
+<1> 目标索引中的分片数必须是源索引中分片数的一个因子。
+<2> 最大压缩参数只会对新写入索引的数据生效，例如当 <<indices-forcemerge,force-merging>> 分片到单个段时。
 
 
-NOTE: Mappings may not be specified in the `_shrink` request.
+NOTE: 不可以在 `_shrink` 请求中指定映射。
 
-NOTE: By default, with the exception of `index.analysis`, `index.similarity`,
-and `index.sort` settings, index settings on the source index are not copied
-during a shrink operation. With the exception of non-copyable settings, settings
-from the source index can be copied to the target index by adding the URL
-parameter `copy_settings=true` to the request. Note that `copy_settings` can not
-be set to `false`. The parameter `copy_settings` will be removed in 8.0.0
+NOTE: 默认情况下，除了 `index.analysis`、`index.similarity` 和 `index.sort` 设置外，源索引上的其它索引设置不会在收缩操作时被复制。除了不可复制的设置之外，可以通过在请求中添加 URL 参数 `copy_settings=true` 来将源索引中的设置复制到目标索引中。需要注意，`copy_settings` 不能设置为 `false`。参数 `copy_settings` 将在8.0.0中删除
 
-deprecated[6.4.0, not copying settings is deprecated, copying settings will be
-the default behavior in 7.x]
+deprecated[6.4.0，不推荐复制设置，复制设置将是7.x中的默认行为]
 
 [float]
-=== Monitoring the shrink process
+=== 监控收缩过程
 
-The shrink process can be monitored with the <<cat-recovery,`_cat recovery`
-API>>, or the <<cluster-health, `cluster health` API>> can be used to wait
-until all primary shards have been allocated by setting the  `wait_for_status`
-parameter to `yellow`.
+可以使用 <<cat-recovery,`_cat recovery` API>> 监控收缩过程，或者通过设置参数 `wait_for_status` 为 `yellow` 的 <<cluster-health, `cluster health` API>> 来监控是否所有主分片都已经分配。
 
-The `_shrink` API returns as soon as the target index has been added to the
-cluster state, before any shards have been allocated. At this point, all
-shards are in the state `unassigned`. If, for any reason, the target index
-can't be allocated on the shrink node, its primary shard will remain
-`unassigned` until it can be allocated on that node.
+在分配任何分片之前，只要目标索引已添加到群集状态，`_shrink` API 就会返回。此时，所有分片都处于 `unassigned` 状态。如果由于任何原因无法在收缩节点上分配目标索引，则其主分片将保持 `unassigned` ，直到可以在该节点上分配为止。
 
-Once the primary shard is allocated, it moves to state `initializing`, and the
-shrink process begins. When the shrink operation completes, the shard will
-become `active`. At that  point, Elasticsearch will try to allocate any
-replicas and may decide to relocate the primary shard to another node.
+一旦分配了主分片，状态就会变为 `initializing` ，然后开始执行收缩过程。当操作完成时，分片将变为 `active` 状态。同时，Elasticsearch 将尝试分配副本，并可能将主分片重定位到另外的节点。
 
 [float]
-=== Wait For Active Shards
+=== 等待活动分片
 
-Because the shrink operation creates a new index to shrink the shards to,
-the <<create-index-wait-for-active-shards,wait for active shards>> setting
-on index creation applies to the shrink index action as well.
+由于收缩操作会创建一个新的索引来减少分片，因此索引创建的设置 <<create-index-wait-for-active-shards,wait for active shards>> 也适用于收缩索引操作。
