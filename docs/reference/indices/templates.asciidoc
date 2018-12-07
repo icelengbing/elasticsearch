@@ -1,18 +1,11 @@
 [[indices-templates]]
-== Index Templates
+== 索引模板
 
-Index templates allow you to define templates that will automatically be
-applied when new indices are created. The templates include both 
-<<index-modules-settings,settings>> and <<mapping,mappings>>
-and a simple pattern template that controls whether the template should be 
-applied to the new index.
+索引模板允许您在创建新索引时自动应用预定义的模板。模板包括 <<index-modules-settings,settings>> 和 <<mapping,mappings>> 以及通过简单的模式模板匹配来控制是否将模板应用于新索引。
 
-NOTE: Templates are only applied at index creation time. Changing a template
-will have no impact on existing indices. When using the create index API, the
-settings/mappings defined as part of the create index call will take precedence
-over any matching settings/mappings defined in the template.
+NOTE: 模板仅在索引创建时生效。更改模板不会对现有索引产生影响。使用创建模板 API 时，创建索引时定义的设置/映射将优先于模板中定义的设置/映射。
 
-For example:
+例如：
 
 [source,js]
 --------------------------------------------------
@@ -43,14 +36,11 @@ PUT _template/template_1
 // CONSOLE
 // TESTSETUP
 
-NOTE: Index templates provide C-style /* */ block comments. Comments are allowed
-everywhere in the JSON document except before the initial opening curly bracket. 
+NOTE: 索引模板提供 C 样式/ * * /块注释。 除了在开始的花括号之前外，JSON文档中的所有地方都允许注释。 
 
-Defines a template named `template_1`, with a template pattern of `te*` or `bar*`.
-The settings and mappings will be applied to any index name that matches
-the `te*` or `bar*` pattern.
+定义名为 `template_1` 的模板，模板模式为 `te*` 或 `bar*`。模板对应的设置和映射会被应用在与 `te*` 或 `bar*` 模式匹配的任何索引名称上。
 
-It is also possible to include aliases in an index template as follows:
+也可以在索引模板中包含别名，如下所示：
 
 [source,js]
 --------------------------------------------------
@@ -75,15 +65,13 @@ PUT _template/template_1
 // CONSOLE
 // TEST[s/^/DELETE _template\/template_1\n/]
 
-<1> the `{index}` placeholder in the alias name will be replaced with the
-actual index name that the template gets applied to, during index creation.
+<1> 在创建索引时，别名中的 `{index}` 占位符将被替换为模板匹配到的索引实际名称。
 
 [float]
 [[delete]]
-=== Deleting a Template
+=== 删除模板
 
-Index templates are identified by a name (in the above case
-`template_1`) and can be deleted as well:
+名称唯一标示索引模板（上例中为`template_1`），可以通过名称删除模板：
 
 [source,js]
 --------------------------------------------------
@@ -93,10 +81,9 @@ DELETE /_template/template_1
 
 [float]
 [[getting]]
-=== Getting templates
+=== 获取模板
 
-Index templates are identified by a name (in the above case
-`template_1`) and can be retrieved using the following:
+索引模板由名称标识（上例中为`template_1`），可以使用以下方法检索：
 
 [source,js]
 --------------------------------------------------
@@ -104,7 +91,7 @@ GET /_template/template_1
 --------------------------------------------------
 // CONSOLE
 
-You can also match several templates by using wildcards like:
+您还可以使用以下通配符匹配多个模板：
 
 [source,js]
 --------------------------------------------------
@@ -113,7 +100,7 @@ GET /_template/template_1,template_2
 --------------------------------------------------
 // CONSOLE
 
-To get list of all index templates you can run:
+要获取所有索引模板的列表可以执行：
 
 [source,js]
 --------------------------------------------------
@@ -123,9 +110,9 @@ GET /_template
 
 [float]
 [[indices-templates-exists]]
-=== Template exists
+=== 模板是否存在
 
-Used to check if the template exists or not. For example:
+可以检查模板是否存在。例如：
 
 [source,js]
 -----------------------------------------------
@@ -133,19 +120,13 @@ HEAD _template/template_1
 -----------------------------------------------
 // CONSOLE
 
-The HTTP status code indicates if the template with the given name
-exists or not. Status code `200` means it exists and `404` means
-it does not.
+可以通过 HTTP 状态代码来判断是否存在给定名称的模板。状态代码 `200` 表示存在，`404` 表示不存在。
 
 [float]
 [[multiple-templates]]
-=== Multiple Templates Matching
+=== 多模板匹配
 
-Multiple index templates can potentially match an index, in this case,
-both the settings and mappings are merged into the final configuration
-of the index. The order of the merging can be controlled using the
-`order` parameter, with lower order being applied first, and higher
-orders overriding them. For example:
+多个索引模板都有可能匹配到某个索引，在这种情况下，设置和映射会被合并到索引的最终配置中。可以使用 `order` 参数指定合并的顺序，首先应用低阶的，然后用高阶的覆盖。例如：
 
 [source,js]
 --------------------------------------------------
@@ -180,21 +161,13 @@ PUT /_template/template_2
 // CONSOLE
 // TEST[s/^/DELETE _template\/template_1\n/]
 
-The above will disable storing the `_source`, but
-for indices that start with `te*`, `_source` will still be enabled.
-Note, for mappings, the merging is "deep", meaning that specific
-object/property based mappings can easily be added/overridden on higher
-order templates, with lower order templates providing the basis.
+上面的命令将不保存 `_source`，但对于以 `te*` 开头的索引，仍然会启用 `_source`。注意，对于映射，合并是“深层次”的，这意味着可以在高阶模板上轻松添加/覆盖特定对象/属性的映射，而低阶模板用来提供基础配置。
 
 [float]
 [[versioning-templates]]
-=== Template Versioning
+=== 模板版本控制
 
-Templates can optionally add a `version` number, which can be any integer value,
-in order to simplify template management by external systems. The `version`
-field is completely optional and it is meant solely for external management of
-templates. To unset a `version`, simply replace the template without specifying
-one.
+可以为模板添加 `version`，编号可以是任意整数，以便通过外部系统简化模板管理。 `version` 字段是完全可选的，它仅用于模板的外部管理。若要取消 `version`，只需在不指定模板的情况下替换模板。
 
 [source,js]
 --------------------------------------------------
@@ -210,9 +183,7 @@ PUT /_template/template_1
 --------------------------------------------------
 // CONSOLE
 
-To check the `version`, you can
-<<common-options-response-filtering, filter responses>>
-using `filter_path` to limit the response to just the `version`:
+要检查 `version`，您可以通过 `filter_path`  <<common-options-response-filtering,过滤响应>> 来限制响应只返回 `version` 字段：
 
 [source,js]
 --------------------------------------------------
@@ -221,7 +192,7 @@ GET /_template/template_1?filter_path=*.version
 // CONSOLE
 // TEST[continued]
 
-This should give a small response that makes it both easy and inexpensive to parse:
+可以看到如下响应内容很少，解析起来既简单成本又低：
 
 [source,js]
 --------------------------------------------------
