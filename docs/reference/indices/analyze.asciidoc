@@ -1,11 +1,9 @@
 [[indices-analyze]]
-== Analyze
+== 分析
 
-Performs the analysis process on a text and return the tokens breakdown
-of the text.
+分析文本并返回拆分后的词元。
 
-Can be used without specifying an index against one of the many built in
-analyzers:
+可以在不指定特定索引的情况下使用内置的某个分词器：
 
 [source,js]
 --------------------------------------------------
@@ -17,7 +15,7 @@ GET _analyze
 --------------------------------------------------
 // CONSOLE
 
-If text parameter is provided as array of strings, it is analyzed as a multi-valued field.
+如果参数 text 是字符串数组，则其会被拆分为多值字段。
 
 [source,js]
 --------------------------------------------------
@@ -29,9 +27,7 @@ GET _analyze
 --------------------------------------------------
 // CONSOLE
 
-Or by building a custom transient analyzer out of tokenizers,
-token filters and char filters. Token filters can use the shorter 'filter'
-parameter name:
+或者使用分词器、词元过滤器和字符过滤器构建自定义瞬态分析器。词元过滤器可以使用较短的过滤器参数名称：
 
 [source,js]
 --------------------------------------------------
@@ -56,9 +52,9 @@ GET _analyze
 --------------------------------------------------
 // CONSOLE
 
-deprecated[5.0.0, Use `filter`/`char_filter` instead of `filters`/`char_filters` and `token_filters` has been removed]
+deprecated[5.0.0，使用 `filter`/`char_filter` 替代 `filters`/`char_filters`，此外 `token_filters` 已被删除]
 
-Custom tokenizers, token filters, and character filters can be specified in the request body as follows:
+可以在请求正文中指定自定义分词器、词元过滤器和字符过滤器，如下所示：
 
 [source,js]
 --------------------------------------------------
@@ -71,7 +67,7 @@ GET _analyze
 --------------------------------------------------
 // CONSOLE
 
-It can also run against a specific index:
+它也可以在特定索引上运行：
 
 [source,js]
 --------------------------------------------------
@@ -83,9 +79,7 @@ GET analyze_sample/_analyze
 // CONSOLE
 // TEST[setup:analyze_sample]
 
-The above will run an analysis on the "this is a test" text, using the
-default index analyzer associated with the `analyze_sample` index. An `analyzer`
-can also be provided to use a different analyzer:
+上面的例子使用索引 `analyze_sample` 默认关联的分析器对文本 "this is a test" 进行分析，也可以为 `analyzer` 参数指定不同的分析器：
 
 [source,js]
 --------------------------------------------------
@@ -98,7 +92,7 @@ GET analyze_sample/_analyze
 // CONSOLE
 // TEST[setup:analyze_sample]
 
-Also, the analyzer can be derived based on a field mapping, for example:
+分析器也可以基于某个字段映射，例如：
 
 [source,js]
 --------------------------------------------------
@@ -111,10 +105,7 @@ GET analyze_sample/_analyze
 // CONSOLE
 // TEST[setup:analyze_sample]
 
-Will cause the analysis to happen based on the analyzer configured in the
-mapping for `obj1.field1` (and if not, the default index analyzer).
-
-A `normalizer` can be provided for keyword field with normalizer associated with the `analyze_sample` index.
+此时的分析动作是基于字段 `obj1.field1` 映射中的分析器配置（如果不是，采用默认索引分析器）。
 
 [source,js]
 --------------------------------------------------
@@ -127,7 +118,7 @@ GET analyze_sample/_analyze
 // CONSOLE
 // TEST[setup:analyze_sample]
 
-Or by building a custom transient normalizer out of token filters and char filters.
+或者通过使用词元过滤器和字符过滤器构建自定义瞬态规范化器。
 
 [source,js]
 --------------------------------------------------
@@ -139,12 +130,11 @@ GET _analyze
 --------------------------------------------------
 // CONSOLE
 
-=== Explain Analyze
+=== 解释分析
 
-If you want to get more advanced details, set `explain` to `true` (defaults to `false`). It will output all token attributes for each token.
-You can filter token attributes you want to output by setting `attributes` option.
+如果您想获得更多细节，请将 `explain` 设置为 `true` （默认为 `false` ）。这会输出每个词元的所有词元属性。您可以通过设置 `attributes` 选项来过滤要输出的令牌属性。
 
-NOTE: The format of the additional detail information is labelled as experimental in Lucene and it may change in the future.
+NOTE: 在 Lucene 中，附加细节信息的格式被标记为实验性的，未来可能会被改变。
 
 [source,js]
 --------------------------------------------------
@@ -158,9 +148,9 @@ GET _analyze
 }
 --------------------------------------------------
 // CONSOLE
-<1> Set "keyword" to output "keyword" attribute only
+<1> 设置“keyword”，仅输出“keyword”属性
 
-The request returns the following result:
+请求返回结果如下：
 
 [source,js]
 --------------------------------------------------
@@ -206,4 +196,4 @@ The request returns the following result:
 }
 --------------------------------------------------
 // TESTRESPONSE
-<1> Output only "keyword" attribute, since specify "attributes" in the request.
+<1> 只输出“keyword”属性，因为在请求中指定了“attributes”。
