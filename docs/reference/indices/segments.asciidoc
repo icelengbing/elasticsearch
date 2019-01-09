@@ -1,12 +1,9 @@
 [[indices-segments]]
-== Indices Segments
+== 索引段
 
-Provide low level segments information that a Lucene index (shard level)
-is built with. Allows to be used to provide more information on the
-state of a shard and an index, possibly optimization information, data
-"wasted" on deletes, and so on.
+提供构建 Lucene 索引（分片级别）的底层段信息。例如索引和分片的详细状态信息、可能的优化信息、删除时数据的“消耗”，等。
 
-Endpoints include segments for a specific index:
+可以通过指定索引名称来访问索引段信息：
 
 [source,js]
 --------------------------------------------------
@@ -16,7 +13,7 @@ GET /test/_segments
 // TEST[s/^/PUT test\n{"settings":{"number_of_shards":1, "number_of_replicas": 0}}\nPOST test\/test\?refresh\n{"test": "test"}\n/]
 // TESTSETUP
 
-For several indices:
+也可以指定多个索引：
 
 [source,js]
 --------------------------------------------------
@@ -25,7 +22,7 @@ GET /test1,test2/_segments
 // CONSOLE
 // TEST[s/^/PUT test1\nPUT test2\n/]
 
-Or for all indices:
+或者针对所有的索引：
 
 [source,js]
 --------------------------------------------------
@@ -33,7 +30,7 @@ GET /_segments
 --------------------------------------------------
 // CONSOLE
 
-Response:
+响应如下：
 
 [source,js]
 --------------------------------------------------
@@ -79,51 +76,34 @@ Response:
 // TESTRESPONSE[s/: (\-)?[0-9]+/: $body.$_path/]
 // TESTRESPONSE[s/7\.0\.0/$body.$_path/]
 
-_0::         The key of the JSON document is the name of the segment. This name
-             is used to generate file names: all files starting with this
-             segment name in the directory of the shard belong to this segment.
+_0::         JSON 文档的关键是段的名称。此名称用于生成文件名：在分片目录中以此段名开头的所有文件都属于此段。
 
-generation:: A generation number that is basically incremented when needing to
-             write a new segment. The segment name is derived from this
-             generation number.
+generation:: 当需要写新段时增加的生成数。段名称来源自此生成数。
 
-num_docs::   The number of non-deleted documents that are stored in this segment.
+num_docs::   存储在此段中的未删除文档数量。
 
-deleted_docs:: The number of deleted documents that are stored in this segment.
-             It is perfectly fine if this number is greater than 0, space is
-             going to be reclaimed when this segment gets merged.
+deleted_docs:: 存储在此段中的已删除文档数。数字大于0是正常情况，当段合并时将回收这些文档所占用的空间。
 
-size_in_bytes:: The amount of disk space that this segment uses, in bytes.
+size_in_bytes:: 段使用的磁盘空间（单位为字节）。
 
-memory_in_bytes:: Segments need to store some data into memory in order to be
-             searchable efficiently. This number returns the number of bytes
-             that are used for that purpose. A value of -1 indicates that
-             Elasticsearch was not able to compute this number.
+memory_in_bytes:: 段会将部分数据放入内存以便可以更有效地搜索。返回的数字代表用于此目的的内存字节数。如果返回-1则表示 Elasticsearch 无法计算该数字。
 
-committed::  Whether the segment has been sync'ed on disk. Segments that are
-             committed would survive a hard reboot. No need to worry in case
-             of false, the data from uncommitted segments is also stored in
-             the transaction log so that Elasticsearch is able to replay
-             changes on the next start.
+committed::  标示段是否已在磁盘上同步。即使重启，已经提交的段也不会丢失。如果提交失败也无需担心，所有未提交段的数据存储在事务日志中，下次启动时 Elasticsearch 会重新提交更改。
 
-search::     Whether the segment is searchable. A value of false would most
-             likely mean that the segment has been written to disk but no
-             refresh occurred since then to make it searchable.
+search::     段是否可搜索。如果值为 false，则可能意味着该段已写入磁盘，但此后没有进行刷新以使其可被搜索。  
 
-version::    The version of Lucene that has been used to write this segment.
+version::    用于写此段的 Lucene 版本号。
 
-compound::   Whether the segment is stored in a compound file. When true, this
-             means that Lucene merged all files from the segment in a single
-             one in order to save file descriptors.
+compound::   段是否存储在复合文件中。如果为 true，则表示 Lucene 将段中的所有文件合并为一个文件保存。
 
-attributes:: Contains information about whether high compression was enabled
+attributes:: 包含是否启用高压缩等信息。
 
 [float]
-=== Verbose mode
+=== 详细模式
 
-To add additional information that can be used for debugging, use the `verbose` flag.
+要添加可用于调试的附加信息，需要使用 `verbose` 标志。
 
-NOTE: The format of the additional detail information is labelled as experimental in Lucene and it may change in the future.
+NOTE: 附加详细信息的格式 在Lucene 中被标记为实验性的，将来可能会改变。
 
 [source,js]
 --------------------------------------------------
@@ -131,7 +111,7 @@ GET /test/_segments?verbose=true
 --------------------------------------------------
 // CONSOLE
 
-Response:
+响应：
 
 [source,js]
 --------------------------------------------------
