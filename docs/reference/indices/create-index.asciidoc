@@ -1,10 +1,9 @@
 [[indices-create-index]]
-== Create Index
+== 创建索引
 
-The Create Index API is used to manually create an index in Elasticsearch.  All documents in Elasticsearch
-are stored inside of one index or another.
+创建索引 API 用于在 ElasticSearch 中手动创建索引。ElasticSearch 中的所有文档都存储在索引中。
 
-The most basic command is the following:
+最基本的命令如下：
 
 [source,js]
 --------------------------------------------------
@@ -12,28 +11,27 @@ PUT twitter
 --------------------------------------------------
 // CONSOLE
 
-This create an index named `twitter` with all default setting.
+这将创建一个名为 `twitter` 的索引，其中包含所有默认设置。
 
 [NOTE]
-.Index name limitations
+.索引名称限制
 ======================================================
-There are several limitations to what you can name your index.  The complete list of limitations are:
+对于索引的命名有一些限制。完整的限制列表如下：
 
-- Lowercase only
-- Cannot include `\`, `/`, `*`, `?`, `"`, `<`, `>`, `|`, ` ` (space character), `,`, `#`
-- Indices prior to 7.0 could contain a colon (`:`), but that's been deprecated and won't be supported in 7.0+
-- Cannot start with `-`, `_`, `+`
-- Cannot be `.` or `..`
-- Cannot be longer than 255 bytes (note it is bytes, so multi-byte characters will count towards the 255 limit faster)
+- 只能使用小写字母
+- 不能包含 `\`、 `/`、 `*`、 `?`、 `"`、 `<`、 `>`、 `|`、 ` ` （空格）、 `,`、 `#`
+- 7.0之前的索引可以包含冒号（`:`），但已弃用，7.0以后的版本中不支持
+- 不能以 `-`、 `_`、 `+`这些字符开头
+- 不能是 `.` 或者 `..`
+- 不能长于255字节（注意是字节，因此多字节字符将更快计数到255限制）
 
 ======================================================
 
 [float]
 [[create-index-settings]]
-=== Index Settings
+=== 索引设置
 
-Each index created can have specific settings
-associated with it, defined in the body:
+创建的每个索引都有与之关联的特定设置，在正文中定义：
 
 [source,js]
 --------------------------------------------------
@@ -48,10 +46,11 @@ PUT twitter
 }
 --------------------------------------------------
 // CONSOLE
-<1> Default for `number_of_shards` is 5
-<2> Default for `number_of_replicas` is 1 (ie one replica for each primary shard)
+<1> 默认 `number_of_shards` 值为5
+<2> 默认 `number_of_replicas` 值为1 （
+即每个主分片一个副本）
 
-or more simplified
+或者简化设置如下
 
 [source,js]
 --------------------------------------------------
@@ -66,19 +65,16 @@ PUT twitter
 // CONSOLE
 
 [NOTE]
-You do not have to explicitly specify `index` section inside the
-`settings` section.
+您不必在 `settings` 中明确指定 `index` 。
 
-For more information regarding all the different index level settings
-that can be set when creating an index, please check the
-<<index-modules,index modules>> section.
+关于在创建索引时，针对所有不同索引级别可以设置的更多详细信息，请参阅 <<index-modules,index modules>> 部分。
 
 
 [float]
 [[mappings]]
-=== Mappings
+=== 映射
 
-The create index API allows to provide a type mapping:
+创建索引 API 允许提供一个类型映射：
 
 [source,js]
 --------------------------------------------------
@@ -100,9 +96,9 @@ PUT test
 
 [float]
 [[create-index-aliases]]
-=== Aliases
+=== 别名
 
-The create index API allows also to provide a set of <<indices-aliases,aliases>>:
+创建索 API 还允许提供一组别名 <<indices-aliases,aliases>>：
 
 [source,js]
 --------------------------------------------------
@@ -123,11 +119,9 @@ PUT test
 
 [float]
 [[create-index-wait-for-active-shards]]
-=== Wait For Active Shards
+=== 等待活动分片
 
-By default, index creation will only return a response to the client when the primary copies of
-each shard have been started, or the request times out. The index creation response will indicate
-what happened:
+默认情况下，索引创建仅在每个分片的主拷贝已启动或请求超时时才返回对客户端的响应。该响应将表明具体发生了什么：
 
 [source,js]
 --------------------------------------------------
@@ -139,20 +133,10 @@ what happened:
 --------------------------------------------------
 // TESTRESPONSE
 
-`acknowledged` indicates whether the index was successfully created in the cluster, while
-`shards_acknowledged` indicates whether the requisite number of shard copies were started for
-each shard in the index before timing out. Note that it is still possible for either
-`acknowledged` or `shards_acknowledged` to be `false`, but the index creation was successful.
-These values simply indicate whether the operation completed before the timeout. If
-`acknowledged` is `false`, then we timed out before the cluster state was updated with the
-newly created index, but it probably will be created sometime soon. If `shards_acknowledged`
-is `false`, then we timed out before the requisite number of shards were started (by default
-just the primaries), even if the cluster state was successfully updated to reflect the newly
-created index (i.e. `acknowledged=true`).
+`acknowledged` 表示索引是否已在群集中成功创建，
+`shards_acknowledged` 表示在超时之前，是否为索引中的每个分片启动了必需数量的分片拷贝。注意，即使索引创建成功，`acknowledged` 或 `shards_acknowledged` 仍然可能为 `false`。这些值仅表示操作是否在超时之前完成。如果 `acknowledged` 为  `false`，可能表明在为新建索引更新集群状态之前超时，但很可能其很快就会刷新。如果 `shards_acknowledged` 为 `false`，则可能表明在启动所需数量的分片之前超时（默认情况下只要有主分片），即使集群状态已成功更新已能反映新建索引（即  `acknowledged=true`）。
 
-We can change the default of only waiting for the primary shards to start through the index
-setting `index.write.wait_for_active_shards` (note that changing this setting will also affect
-the `wait_for_active_shards` value on all subsequent write operations):
+我们可以通过索引设置 `index.write.wait_for_active_shards` 更改仅等待主分片开始的默认值（注意，更改此设置也会影响所有后续写操作的  `wait_for_active_shards` 值）：
 
 [source,js]
 --------------------------------------------------
@@ -166,7 +150,7 @@ PUT test
 // CONSOLE
 // TEST[skip:requires two nodes]
 
-or through the request parameter `wait_for_active_shards`:
+或者通过请求参数 `wait_for_active_shards` 来设定:
 
 [source,js]
 --------------------------------------------------
@@ -175,5 +159,5 @@ PUT test?wait_for_active_shards=2
 // CONSOLE
 // TEST[skip:requires two nodes]
 
-A detailed explanation of `wait_for_active_shards` and its possible values can be found
-<<index-wait-for-active-shards,here>>.
+有关 `wait_for_active_shards` 的详细说明和其可能的取值点击 <<index-wait-for-active-shards,这里>> 查询。
+
