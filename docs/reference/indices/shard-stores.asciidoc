@@ -1,39 +1,27 @@
 [[indices-shards-stores]]
-== Indices Shard Stores
+== 索引分片存储
 
-Provides store information for shard copies of indices.
-Store information reports on which nodes shard copies exist, the shard
-copy allocation ID, a unique identifier for each shard copy, and any exceptions
-encountered while opening the shard index or from earlier engine failure.
+提供索引分片的存储信息。包括有哪些节点存在分片、分片分配的ID、每个分片的唯一标识符，以及打开分片索引或之前引擎故障时遇到的任何异常。
 
-By default, only lists store information for shards that have at least one
-unallocated copy. When the cluster health status is yellow, this will list
-store information for shards that have at least one unassigned replica.
-When the cluster health status is red, this will list store information
-for shards, which has unassigned primaries.
+默认情况下，仅列出具有至少一个未分配的分片的存储信息。当群集健康状态为黄色时，将列出具有至少一个未指派的分片的存储信息。当群集健康状态为红色时，将列出未指派主分片的存储信息，
 
-Endpoints include shard stores information for a specific index, several
-indices, or all:
+端点包括特定索引、多个索引或全部索引的分片存储信息：
 
 [source,js]
 --------------------------------------------------
-# return information of only index test
+# 仅返回索引 test 的信息
 GET /test/_shard_stores
 
-# return information of only test1 and test2 indices
+# 仅返回索引 test1 和 test2 的信息
 GET /test1,test2/_shard_stores
 
-# return information of all indices
+# 返回所有索引信息
 GET /_shard_stores
 --------------------------------------------------
 // CONSOLE
 // TEST[s/^/PUT test\nPUT test1\nPUT test2\n/]
 
-The scope of shards to list store information can be changed through
-`status` param. Defaults to 'yellow' and 'red'. 'yellow' lists store information of
-shards with at least one unassigned replica and 'red' for shards with unassigned
-primary shard.
-Use 'green' to list store information for shards with all assigned copies.
+可以通过 `status` 参数更改显示存储信息的分片范围。默认为 'yellow' 和 'red'。 'yellow' 列出具有至少一个未指派分片副本的信息，'red' 列出未指派主分片信息。使用 'green' 列出所有已指派拷贝的分片存储信息。
 
 [source,js]
 --------------------------------------------------
@@ -43,9 +31,9 @@ GET /_shard_stores?status=green
 // TEST[setup:node]
 // TEST[s/^/PUT my-index\n{"settings":{"number_of_shards":1, "number_of_replicas": 0}}\nPOST my-index\/test\?refresh\n{"test": "test"}\n/]
 
-Response:
+响应如下：
 
-The shard stores information is grouped by indices and shard ids.
+分片存储信息按索引和分片 ID 分组。
 
 [source,js]
 --------------------------------------------------
@@ -80,12 +68,9 @@ The shard stores information is grouped by indices and shard ids.
 
 
 
-<1> The key is the corresponding shard id for the store information
-<2> A list of store information for all copies of the shard
-<3> The node information that hosts a copy of the store, the key
-    is the unique node id.
-<4> The allocation id of the store copy
-<5> The status of the store copy, whether it is used as a
-    primary, replica or not used at all
-<6> Any exception encountered while opening the shard index or
-    from earlier engine failure
+<1> 分片 ID
+<2> 所有分片列表
+<3> 节点 ID
+<4> 分配 ID
+<5> 状态，可以是 primary、replica 或者 unused
+<6> 异常信息
