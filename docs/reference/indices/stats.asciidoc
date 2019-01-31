@@ -1,12 +1,9 @@
 [[indices-stats]]
-== Indices Stats
+== 索引统计
 
-Indices level stats provide statistics on different operations happening
-on an index. The API provides statistics on the index level scope
-(though most stats can also be retrieved using node level scope).
+索引级统计提供索引上发生的不同操作的统计信息。该 API 提供索引级作用域的统计信息（尽管大多数统计信息也可以使用节点级作用域获得）。
 
-The following returns high level aggregation and index level stats for
-all indices:
+以下返回所有索引的高级聚合和索引级统计信息：
 
 [source,js]
 --------------------------------------------------
@@ -14,7 +11,7 @@ GET /_stats
 --------------------------------------------------
 // CONSOLE
 
-Specific index stats can be retrieved using:
+可以使用以下方法获得特定索引的统计信息：
 
 [source,js]
 --------------------------------------------------
@@ -23,76 +20,63 @@ GET /index1,index2/_stats
 // CONSOLE
 // TEST[s/^/PUT index1\nPUT index2\n/]
 
-By default, all stats are returned, returning only specific stats can be
-specified as well in the URI. Those stats can be any of:
+默认情况下，将返回所有统计信息，也可以在 URI 中指定返回特定统计信息。可以是：
 
 [horizontal]
-`docs`:: 		The number of docs / deleted docs (docs not yet merged out).
-				Note, affected by refreshing the index.
+`docs`:: 		文档数/已删除的文档数（尚未合并的文档）。注意，受索引刷新的影响。
 
-`store`:: 		The size of the index.
+`store`:: 		索引的大小。
 
-`indexing`:: 	Indexing statistics, can be combined with a comma
-				separated list of `types` to provide document type level stats.
+`indexing`:: 	索引统计信息，可以与逗号分隔 `types` 列表结合使用，以提供文档类型级别的统计信息。
 
-`get`:: 		Get statistics, including missing stats.
+`get`:: 		获取统计信息，包括缺失的统计信息。
 
-`search`:: 		Search statistics including suggest statistics.
-                You can include statistics for custom groups by adding
-                an extra `groups` parameter (search operations can be associated with one or more
-                groups). The `groups` parameter accepts a comma separated list of group names.
-                Use `_all` to return statistics for all groups.
+`search`:: 		搜索包括建议统计的统计信息。通过添加额外的 `groups` 参数，可以包括自定义组的统计信息（搜索操作可以与一个或多个组关联）。`groups`  参数接受以逗号分隔的组名列表。使用 `_all` 返回所有组的统计信息。
 
-`segments`::    Retrieve the memory use of the open segments. Optionally, setting the `include_segment_file_sizes` flag, report the aggregated disk usage of each one of the Lucene index files.
+`segments`::    获取打开段的内存使用情况。可设置 `include_segment_file_sizes` 标志，报告每个 lucene 索引文件的总计磁盘使用情况。
 
-`completion`::  Completion suggest statistics.
-`fielddata`::   Fielddata statistics.
-`flush`::       Flush statistics.
-`merge`::       Merge statistics.
-`request_cache`:: <<shard-request-cache,Shard request cache>> statistics.
-`refresh`::     Refresh statistics.
-`warmer`::      Warmer statistics.
-`translog`::    Translog statistics.
+`completion`::  完成建议统计。
+`fielddata`::   Fielddata 统计
+`flush`::       提交统计。
+`merge`::       合并统计。
+`request_cache`:: <<shard-request-cache,分片请求缓存>> 统计。
+`refresh`::     刷新统计。
+`warmer`::      热数据统计。
+`translog`::    事务日志统计。
 
-Some statistics allow per field granularity which accepts a list
-comma-separated list of included fields. By default all fields are included:
+一些统计信息可以到字段粒度。其接收由逗号分隔的字段参数列表。默认情况下，包括所有字段：
 
 [horizontal]
 `fields`::
 
-    List of fields to be included in the statistics. This is used as the
-    default list unless a more specific field list is provided (see below).
+    要包含在统计信息中的字段列表。除非提供更具体的字段列表，否则其将作为默认列表（参见下文）。
 
 `completion_fields`::
 
-    List of fields to be included in the Completion Suggest statistics.
+    要包含在完成建议统计中的字段列表。
 
 `fielddata_fields`::
 
-    List of fields to be included in the Fielddata statistics.
+    要包含在 Fielddata 统计信息中的字段列表。
 
 
-Here are some samples:
+示例如下：
 
 [source,js]
 --------------------------------------------------
-# Get back stats for merge and refresh only for all indices
+# 为所有索引返回合并和刷新的统计信息
 GET /_stats/merge,refresh
-# Get back stats for type1 and type2 documents for the my_index index
+# 返回索引 my_index 的 type1 和 type2 文档的统计信息
 GET /my_index/_stats/indexing?types=type1,type2
-# Get back just search stats for group1 and group2
+# 返回搜索 group1 和 group2 的统计信息
 GET /_stats/search?groups=group1,group2
 --------------------------------------------------
 // CONSOLE
 // TEST[s/^/PUT my_index\n/]
 
-The stats returned are aggregated on the index level, with
-`primaries` and `total` aggregations, where `primaries` are the values for only the
-primary shards, and `total` are the cumulated values for both primary and replica shards.
+使用 `primaries` 和 `total` 聚合，返回的统计数据是在索引级别聚合，其中 `primaries` 是仅主分片的值，而 `total` 则包含了全部主分片和副本分片。
 
-In order to get back shard level stats, set the `level` parameter to `shards`.
+如果要返回分片级别的统计信息，请将 `level` 参数设置为 `shards` 。
 
-Note, as shards move around the cluster, their stats will be cleared as
-they are created on other nodes. On the other hand, even though a shard
-"left" a node, that node will still retain the stats that shard
-contributed to.
+注意，当分片在集群中移动时，它们的状态将在其他节点上创建时被清除。另一方面，即使一个分片“脱离”了一个节点，该节点仍将保留分片所贡献的统计信息。
+
