@@ -1,8 +1,7 @@
 [[indices-clearcache]]
-== Clear Cache
+== 清除缓存
 
-The clear cache API allows to clear either all caches or specific cached
-associated with one or more indices.
+清除缓存 API 允许清除所有缓存或与一个或多个索引关联的特定缓存。
 
 [source,js]
 --------------------------------------------------
@@ -11,8 +10,7 @@ POST /twitter/_cache/clear
 // CONSOLE
 // TEST[setup:twitter]
 
-The API, by default, will clear all caches. Specific caches can be cleaned
-explicitly by setting the `query`, `fielddata` or `request` url parameter to `true`.
+默认情况下，API 将清除所有缓存。通过将 `query`，`fielddata` 或 `request` url参数设置为 `true`，可以显式清除特定的缓存。
 
 [source,js]
 --------------------------------------------------
@@ -22,14 +20,11 @@ POST /twitter/_cache/clear?fielddata=true   <3>
 --------------------------------------------------
 // CONSOLE
 // TEST[continued]
-<1> Cleans only the query cache
-<2> Cleans only the request cache
-<3> Cleans only the fielddata cache
+<1> 仅清除 query 缓存
+<2> 仅清除 request 缓存
+<3> 仅清除 fielddata 缓存
 
-In addition to this, all caches relating to a specific field can also be
-cleared by specifying `fields` url parameter with a comma delimited list of
-the fields that should be cleared. Note that the provided names must refer to
-concrete fields -- objects and field aliases are not supported.
+除此之外，还可以通过使用逗号分隔的应清除字段列表指定 `fields` url 参数来清除与特定字段相关的所有缓存。需注意，提供的名称必须引用具体字段 --  不支持对象和字段别名。
 
 [source,js]
 --------------------------------------------------
@@ -37,13 +32,12 @@ POST /twitter/_cache/clear?fields=foo,bar   <1>
 --------------------------------------------------
 // CONSOLE
 // TEST[continued]
-<1> Clear the cache for the `foo` an `bar` field
+<1> 清除 `foo` 和 `bar` 字段缓存
 
 [float]
-=== Multi Index
+=== 多索引
 
-The clear cache API can be applied to more than one index with a single
-call, or even on `_all` the indices.
+清除缓存 API 可以通过一次调用应用于多个索引，甚至可以应用于 `_all` 索引。
 
 [source,js]
 --------------------------------------------------
