@@ -1,11 +1,7 @@
 [[indices-refresh]]
-== Refresh
+== 刷新
 
-The refresh API allows to explicitly refresh one or more index, making
-all operations performed since the last refresh available for search.
-The (near) real-time capabilities depend on the index engine used. For
-example, the internal one requires refresh to be called, but by default a
-refresh is scheduled periodically.
+刷新 API 允许显式刷新一个或多个索引，使自上次刷新以来执行的所有操作都可用于搜索。 实时（近似）功能取决于所使用的索引设置。例如，内部根据需求调用刷新，但默认情况下会定期调度刷新。
 
 [source,js]
 --------------------------------------------------
@@ -15,10 +11,9 @@ POST /twitter/_refresh
 // TEST[setup:twitter]
 
 [float]
-=== Multi Index
+=== 多索引
 
-The refresh API can be applied to more than one index with a single
-call, or even on `_all` the indices.
+刷新 API 可以将一次调用应用于多个索引，甚至可以应用于 _all 索引
 
 [source,js]
 --------------------------------------------------
