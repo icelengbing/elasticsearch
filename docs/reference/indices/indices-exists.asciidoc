@@ -1,7 +1,7 @@
 [[indices-exists]]
-== Indices Exists
+== 索引存在检查
 
-Used to check if the index (indices) exists or not. For example:
+用于检查索引是否存在。例如：
 
 [source,js]
 --------------------------------------------------
@@ -10,8 +10,7 @@ HEAD twitter
 // CONSOLE
 // TEST[setup:twitter]
 
-The HTTP status code indicates if the index exists or not. A `404` means
-it does not exist, and `200` means it does.
+HTTP 状态代码表明指定索引是否存在。`404`  表示不存在， `200` 表示存在。
 
-IMPORTANT: This request does not distinguish between an index and an alias,
-i.e. status code `200` is also returned if an alias exists with that name.
+IMPORTANT: 此请求不区分索引和别名，即如果存在具有该名称的别名，也会返回状态代码200。
+
