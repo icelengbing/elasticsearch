@@ -1,7 +1,7 @@
 [[indices-get-index]]
-== Get Index
+== 获取索引
 
-The get index API allows to retrieve information about one or more indexes.
+获取索引 API 允许检索一个或多个索引的信息。
 
 [source,js]
 --------------------------------------------------
@@ -10,8 +10,6 @@ GET /twitter
 // CONSOLE
 // TEST[setup:twitter]
 
-The above example gets the information for an index called `twitter`. Specifying an index,
-alias or wildcard expression is required.
+上面的示例获取名为 `twitter` 的索引的信息。需要指定索引，别名或通配符表达式。
 
-The get index API can also be applied to more than one index, or on
-all indices by using `_all` or `*` as index.
+获取索引 API 也可以通过使用 `_all` 或 `*` 作为索引应用于多个索引或所有索引。
