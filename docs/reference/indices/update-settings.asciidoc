@@ -1,11 +1,9 @@
 [[indices-update-settings]]
-== Update Indices Settings
+== 更新索引设置
 
-Change specific index level settings in real time.
+实时更改指定索引设置。
 
-The REST endpoint is `/_settings` (to update all indices) or
-`{index}/_settings` to update one (or more) indices settings.
-The body of the request includes the updated settings, for example:
+可以使用 REST 端点 `/_settings`（更新所有索引）或 `{index}/_settings` 更新一个（或多个）索引的设置。要更新的设置在请求正文中，例如：
 
 [source,js]
 --------------------------------------------------
@@ -19,7 +17,7 @@ PUT /twitter/_settings
 // CONSOLE
 // TEST[setup:twitter]
 
-To reset a setting back to the default value, use `null`. For example:
+要将设置重置为默认值，可以使用 `null`。例如：
 
 [source,js]
 --------------------------------------------------
@@ -33,19 +31,13 @@ PUT /twitter/_settings
 // CONSOLE
 // TEST[setup:twitter]
 
-The list of per-index settings which can be updated dynamically on live
-indices can be found in <<index-modules>>.
-To preserve existing settings from being updated, the `preserve_existing`
-request parameter can be set to `true`.
+能在索引上动态更新的设置列表可以在 <<index-modules>> 中找到。如果要保持现有设置不被更新，可以将请求参数 `preserve_existing` 设置为 `true`。
 
 [float]
 [[bulk]]
-=== Bulk Indexing Usage
+=== 批量索引用法
 
-For example, the update settings API can be used to dynamically change
-the index from being more performant for bulk indexing, and then move it
-to more real time indexing state. Before the bulk indexing is started,
-use:
+可以使用更新设置 API 动态地更改索引设置，使其更适合批量索引，完成后再将其改为实时索引设置。例如，在批量索引开始之前，使用：
 
 [source,js]
 --------------------------------------------------
@@ -59,11 +51,9 @@ PUT /twitter/_settings
 // CONSOLE
 // TEST[setup:twitter]
 
-(Another optimization option is to start the index without any replicas,
-and only later adding them, but that really depends on the use case).
+（另一个优化方法是不带副本启动索引，然后再添加副本，但使用场景要依据实际情况而定）。
 
-Then, once bulk indexing is done, the settings can be updated (back to
-the defaults for example):
+然后，一旦完成批量索引，就可以更新设置（例如，改回到默认值）：
 
 [source,js]
 --------------------------------------------------
@@ -77,7 +67,7 @@ PUT /twitter/_settings
 // CONSOLE
 // TEST[continued]
 
-And, a force merge should be called:
+然后，再调用强制合并：
 
 [source,js]
 --------------------------------------------------
@@ -88,14 +78,11 @@ POST /twitter/_forcemerge?max_num_segments=5
 
 [float]
 [[update-settings-analysis]]
-=== Updating Index Analysis
+=== 更新索引分析
 
-It is also possible to define new <<analysis,analyzers>> for the index.
-But it is required to <<indices-open-close,close>> the index
-first and <<indices-open-close,open>> it after the changes are made.
+也可以为索引定义新的 <<analysis,分词器>>。但是需要先 <<indices-open-close,关闭>> 索引，在更改生效后再重新 <<indices-open-close,打开>>。
 
-For example if `content` analyzer hasn't been defined on `myindex` yet
-you can use the following commands to add it:
+例如，如果未在 `myindex` 上定义 `content` 分词器，可以使用以下命令添加：
 
 [source,js]
 --------------------------------------------------
