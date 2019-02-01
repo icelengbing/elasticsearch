@@ -1,19 +1,11 @@
 [[indices-forcemerge]]
-== Force Merge
+== 强制合并
 
-The force merge API allows to force merging of one or more indices through an
-API. The merge relates to the number of segments a Lucene index holds within
-each shard. The force merge operation allows to reduce the number of segments by
-merging them.
+强制合并 API 允许通过 API 强制合并一个或多个索引。合并与 Lucene 索引在每个分片中保存的段的数量相关。强制合并操作允许通过合并它们来减少段的数量。
 
-This call will block until the merge is complete. If the http connection is
-lost, the request will continue in the background, and any new requests will
-block until the previous force merge is complete.
+调用会一直持续到合并完成。期间如果 http 连接丢失，请求将在后台继续执行，并且任何新请求都将被阻塞，直到上一次强制合并完成。
 
-WARNING: Force merge should only be called against *read-only indices*. Running 
-force merge against a read-write index can cause very large segments to be produced 
-(>5Gb per segment), and the merge policy will never consider it for merging again until 
-it mostly consists of deleted docs. This can cause very large segments to remain in the shards.
+WARNING: 只应针对*只读索引*调用强制合并。针对读写索引运行强制合并可能会导致生成非常大的段（每段大于5Gb），并且除非其主要由已删除的文档组成，否则合并策略将不会考虑再次合并。这可能会导致非常大的段保留在分片中。
 
 [source,js]
 --------------------------------------------------
@@ -24,24 +16,17 @@ POST /twitter/_forcemerge
 
 [float]
 [[forcemerge-parameters]]
-=== Request Parameters
+=== 请求参数
 
-The force merge API accepts the following request parameters:
+强制合并API接受以下请求参数：
 
 [horizontal]
-`max_num_segments`:: The number of segments to merge to. To fully
-merge the index, set it to `1`. Defaults to simply checking if a
-merge needs to execute, and if so, executes it.
+`max_num_segments`:: 要合并的段数。要完全合并索引，请将其设置为`1`。默认只是检查合并是否需要执行，如果是，则执行它。
 
-`only_expunge_deletes`:: Should the merge process only expunge segments with
-deletes in it. In Lucene, a document is not deleted from a segment, just marked
-as deleted. During a merge process of segments, a new segment is created that
-does not have those deletes. This flag allows to only merge segments that have
-deletes. Defaults to `false`.  Note that this won't override the
-`index.merge.policy.expunge_deletes_allowed` threshold.
+`only_expunge_deletes`:: 合并过程是否仅删除其中包含删除内容的段。在 Lucene 中，文档不会从段中删除，只是标记为已删除。在段的合并过程中，会创建一个没有这些删除的新段。此标志仅允许合并具有删除的段。默认为 `false`。注意，这不会覆盖 `index.merge.policy.expunge_deletes_allowed` 阈值。
 
-`flush`::  Should a flush be performed after the forced merge. Defaults to
-`true`.
+
+`flush`::  是否应在强制合并后执行刷新。默认为 `true`。
 
 [source,js]
 --------------------------------------------------
@@ -52,14 +37,9 @@ POST /kimchy/_forcemerge?only_expunge_deletes=false&max_num_segments=100&flush=t
 
 [float]
 [[forcemerge-multi-index]]
-=== Multi Index
+=== 多索引
 
-The force merge API can be applied to more than one index with a single call, or
-even on `_all` the indices. Multi index operations are executed one shard at a
-time per node. Force merge makes the storage for the shard being merged
-temporarily increase, up to double its size in case `max_num_segments` is set
-to `1`, as all segments need to be rewritten into a new one.
-
+强制合并 API 可以将单个调用应用于多个索引，甚至可以应用于 `_all` 索引。每个节点一次在一个分片上执行多索引操作。强制合并会使被合并的分片存储量暂时增加，如果 `max_num_segments` 设置为 `1` ，则存储量将增加一倍，因为所有分片都需要重写为新的分片。
 
 [source,js]
 --------------------------------------------------
