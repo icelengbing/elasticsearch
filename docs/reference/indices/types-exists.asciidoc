@@ -1,7 +1,7 @@
 [[indices-types-exists]]
-== Types Exists
+== 检查类型
 
-Used to check if a type/types exists in an index/indices.
+用于检查索引中是否存在类型。
 
 [source,js]
 --------------------------------------------------
@@ -10,5 +10,4 @@ HEAD twitter/_mapping/tweet
 // CONSOLE
 // TEST[setup:twitter]
 
-The HTTP status code indicates if the type exists or not. A `404` means
-it does not exist, and `200` means it does.
+HTTP 状态代码指示类型是否存在。 `404` 表示它不存在，`200` 表示它存在。
