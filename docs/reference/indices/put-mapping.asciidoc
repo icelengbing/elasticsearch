@@ -1,7 +1,7 @@
 [[indices-put-mapping]]
-== Put Mapping
+== 设置映射
 
-The PUT mapping API allows you to add fields to an existing index or to change search only settings of existing fields.
+PUT 映射 API 允许您添加字段到现有索引或更改现有字段的搜索设置。
 
 [source,js]
 --------------------------------------------------
@@ -18,17 +18,15 @@ PUT twitter/_mapping/_doc <2>
 }
 --------------------------------------------------
 // CONSOLE
-<1> <<indices-create-index,Creates an index>> called `twitter` without any type mapping.
-<2> Uses the PUT mapping API to add a new field called `email` to the `_doc` mapping type.
+<1> 不带任何类型映射 <<indices-create-index,创建一个索引>> `twitter`。
+<2> 使用 PUT 映射 API 将名为 `email` 的新字段添加到 `_doc` 映射类型。
 
-More information on how to define type mappings can be found in the
-<<mapping,mapping>> section.
+有关如何定义类型映射的更多信息，请参阅 <<mapping,映射>> 章节。
 
 [float]
-=== Multi-index
+=== 多索引
 
-The PUT mapping API can be applied to multiple indices with a single request.
-For example, we can update the `twitter-1` and `twitter-2` mappings at the same time:
+PUT 映射 API 可以将单个请求应用于多个索引。例如，我们可以同时更新 `twitter-1` 和 `twitter-2` 索引的映射：
 
 [source,js]
 --------------------------------------------------
@@ -47,26 +45,21 @@ PUT /twitter-1,twitter-2/_mapping/_doc <1>
 }
 --------------------------------------------------
 // CONSOLE
-<1> Note that the indices specified (`twitter-1,twitter-2`) follows <<multi-index,multiple index names>> and wildcard format.
+<1> 请注意，指定的索引（`twitter-1，twitter-2`）需遵循 <<multi-index,多索引名称>> 和通配符格式。
 
-
-NOTE: When updating the `_default_` mapping with the
-<<indices-put-mapping,PUT mapping>> API, the new mapping is not merged with
-the existing mapping.  Instead, the new `_default_` mapping replaces the
-existing one.
+NOTE: 使用 <<indices-put-mapping,PUT mapping>> API 更新 `_default_` 映射时，新映射不会与现有映射合并。相反，新的 `_default_` 映射会取代现有映射。
 
 [[updating-field-mappings]]
 [float]
-=== Updating field mappings
+=== 更新字段映射
 
-In general, the mapping for existing fields cannot be updated.  There are some
-exceptions to this rule. For instance:
+通常，无法更新现有字段的映射。不过有一些例外。例如：
 
-* new <<properties>> can be added to <<object>> fields.
-* new <<multi-fields,multi-fields>> can be added to existing fields.
-* the <<ignore-above>> parameter can be updated.
+* 新的 <<properties>> 能够被添加到 <<object>> 字段中。
+* 新的 <<multi-fields,多重字段>> 能够被添加到现有字段中。
+* 参数 <<ignore-above>> 可以被更新。
 
-For example:
+例如：
 
 [source,js]
 -----------------------------------
@@ -108,9 +101,8 @@ PUT my_index/_mapping/_doc
 }
 -----------------------------------
 // CONSOLE
-<1> Create an index with a `first` field under the `name` <<object>> field, and a `user_id` field.
-<2> Add a `last` field under the `name` object field.
-<3> Update the `ignore_above` setting from its default of 0.
+<1> 创建一个索引，包含 `name` 和 `user_id` 字段，其中 `name` <<object>> 字段含有属性 `first` 字段。
+<2> 为对象字段 `name` 添加 `last` 字段.
+<3> 更新 `ignore_above` 设置的默认值。
 
-Each <<mapping-params,mapping parameter>> specifies whether or not its setting
-can be updated on an existing field.
+每个 <<mapping-params,映射参数>> 指定是否可以在现有字段上更新其设置。
