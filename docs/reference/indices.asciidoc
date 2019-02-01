@@ -1,14 +1,13 @@
 [[indices]]
-= Indices APIs
+= 索引 APIs
 
 [partintro]
 --
-The indices APIs are used to manage individual indices,
-index settings, aliases, mappings, and index templates.
+索引 API 用于管理各个索引，索引设置，别名，映射和索引模板等。
 
 [float]
 [[index-management]]
-== Index management:
+== 索引管理：
 
 * <<indices-create-index>>
 * <<indices-delete-index>>
@@ -21,7 +20,7 @@ index settings, aliases, mappings, and index templates.
 
 [float]
 [[mapping-management]]
-== Mapping management:
+== 映射管理：
 
 * <<indices-put-mapping>>
 * <<indices-get-mapping>>
@@ -30,12 +29,12 @@ index settings, aliases, mappings, and index templates.
 
 [float]
 [[alias-management]]
-== Alias management:
+== 别名管理：
 * <<indices-aliases>>
 
 [float]
 [[index-settings]]
-== Index settings:
+== 索引设置：
 * <<indices-update-settings>>
 * <<indices-get-settings>>
 * <<indices-analyze>>
@@ -43,7 +42,7 @@ index settings, aliases, mappings, and index templates.
 
 [float]
 [[monitoring]]
-== Monitoring:
+== 监控：
 * <<indices-stats>>
 * <<indices-segments>>
 * <<indices-recovery>>
@@ -51,7 +50,7 @@ index settings, aliases, mappings, and index templates.
 
 [float]
 [[status-management]]
-== Status management:
+== 状态管理：
 * <<indices-clearcache>>
 * <<indices-refresh>>
 * <<indices-flush>>
