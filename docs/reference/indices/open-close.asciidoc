@@ -1,14 +1,9 @@
 [[indices-open-close]]
-== Open / Close Index API
+== 打开 / 关闭索引 API
 
-The open and close index APIs allow to close an index, and later on
-opening it. A closed index has almost no overhead on the cluster (except
-for maintaining its metadata), and is blocked for read/write operations.
-A closed index can be opened which will then go through the normal
-recovery process.
+打开和关闭索引 API 允许关闭索引，然后打开它。一个关闭的索引在集群上几乎没有任何开销（除了维护其元数据），对其进行读/写操作均会被拒绝。可以打开一个关闭的索引，然后进行正常的恢复过程。
 
-The REST endpoint is `/{index}/_close` and `/{index}/_open`. For
-example:
+调用的 REST 端点为 `/{index}/_close` 和 `/{index}/_open`。例如：
 
 [source,js]
 --------------------------------------------------
@@ -19,26 +14,15 @@ POST /my_index/_open
 // CONSOLE
 // TEST[s/^/PUT my_index\n/]
 
-It is possible to open and close multiple indices. An error will be thrown
-if the request explicitly refers to a missing index. This behaviour can be
-disabled using the `ignore_unavailable=true` parameter.
+可以打开和关闭多个索引。如果请求缺少索引，则会引发错误。可以使用 `ignore_unavailable = true` 参数禁用此行为。
 
-All indices can be opened or closed at once using `_all` as the index name
-or specifying patterns that identify them all (e.g. `*`).
+所有索引都可以使用 `_all` 作为索引名称一次性全部打开或关闭，或者指定索引名称的模式（例如 `*`）。
 
-Identifying indices via wildcards or `_all` can be disabled by setting the
-`action.destructive_requires_name` flag in the config file to `true`.
-This setting can also be changed via the cluster update settings api.
+通过将配置文件中的 `action.destructive_requires_name` 标志设置为  `true`，可以禁用使用通配符或 `_all`  标识索引。也可以通过群集更新设置 api 更改此设置。
 
-Closed indices consume a significant amount of disk-space which can cause problems in managed environments. Closing indices can be disabled via the cluster settings
-API by setting `cluster.indices.close.enable` to `false`. The default is `true`.
+关闭的索引占用大量磁盘空间，可能会导致托管环境出现问题。可以通过集群设置 API 将  `cluster.indices.close.enable` 设置为 `false` 来禁用关闭索引。默认是 `true`。
 
 [float]
-=== Wait For Active Shards
+=== 等待活动分片
 
-Because opening an index allocates its shards, the
-<<create-index-wait-for-active-shards,`wait_for_active_shards`>> setting on
-index creation applies to the index opening action as well. The default value
-for the <<create-index-wait-for-active-shards,`wait_for_active_shards`>> setting
-on the open index API is 0, which means that the command won't wait for the shards
-to be allocated.
+由于打开索引会分配其分片，因此创建索引时的 <<create index wait for active shards,`wait_for active_shards`>> 设置也适用于索引打开操作。打开索引 API  的 <<create index wait for active shards,`wait_for_active_shards`>>设置的默认值为0，这意味着该命令不会等待分配分片。
